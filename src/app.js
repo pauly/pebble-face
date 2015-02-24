@@ -47,6 +47,10 @@ var shake = function ( e ) {
 
 main.on( 'accelTap', shake );
 main.on( 'click', click );
+var openConfig = function ( e ) {
+  Settings.option( 'foo', 'bar' );
+  Settings.option( 'apiKey', apiKey );
+};
 var closeConfig = function ( e ) {
   console.log('closed configurable');
   main.body( 'closed, ' + JSON.stringify( e.options ));
@@ -56,6 +60,6 @@ var closeConfig = function ( e ) {
   }
 };
  
-Settings.config( { url: 'http://www.clarkeology.com/project/pebble?apiKey=' + apiKey }, closeConfig );
+Settings.config( { url: 'http://www.clarkeology.com/project/pebble?apiKey=' + apiKey }, openConfig, closeConfig );
 main.show( );
 getData( );
