@@ -4,7 +4,7 @@
         "configurable"
     ],
     "companyName": "pauly@clarkeology.com",
-    "longName": "Sample project",
+    "longName": "Laundrino DIY smart washing machine monitor",
     "projectType": "pebblejs",
     "resources": {
         "media": [
@@ -31,7 +31,7 @@
             }
         ]
     },
-    "shortName": "Sample project",
+    "shortName": "Laundrino",
     "uuid": "5adf66ff-26a8-4ab4-b144-7bbaed461c3b",
     "versionCode": 1,
     "versionLabel": "1.0",
