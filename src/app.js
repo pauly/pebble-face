@@ -1,125 +1,61 @@
 /**
- * Welcome to Pebble.js!
- *
- * This is where you write your app.
+ * my first pebble app
  */
 
 var UI = require('ui');
+var Settings = require('settings');
 var ajax = require('ajax');
 var Vibe = require('ui/vibe');
+var apiKey = 'hWAb9ldyzupRqCAKIqsrsQ==';
 
-var redditResponse;
-var ajaxResponseReceived = false;
+var main = new UI.Card( {
+  title: 'Laundrino',
+  body: 'Shake to view',
+  scrollable: true
+} );
 
-var main = new UI.Card({
-  title: "/r/AppHookup",
-  body: "Press select to browse.\n\nShake to refresh."
-});
-
-function getPosts() {
-  main.body("Press select to browse.\n\nLoading posts...");
-  ajaxResponseReceived = false;
-  redditResponse = null;
-  
-  ajax({ url: 'http://www.reddit.com/r/apphookup/new.json?sort=new&limit=35', type: 'json' },
-    function(data) {
-      redditResponse = data;
-      ajaxResponseReceived = true;
-      
-      console.log('Received data.');
-      Vibe.vibrate('short');
-      main.body("Press select to browse.\n\nShake to refresh.");
-    },
-    function(error) {
-      console.log('Error receiving reddit data.');  
-      main.body("Could not download posts.\n\nShake to try refreshing again.");
-    }
-  );
-}
-
-main.show();
-getPosts();
-  
-main.on('click', 'select', function(e) {
-  if (!ajaxResponseReceived) return false;
-    
-  var appsList = parseApps(redditResponse);
-  var appMenu = new UI.Menu({
-    sections: [{
-      title: "Newest posts",
-      items: appsList
-    }]
-  });
-  
-  appMenu.show();
-  
-  appMenu.on('select', function(e) {
-    var appDetails = new UI.Card({
-      title: e.item.title,
-      body: e.item.subtitle + '\n' + e.item.body,
-      scrollable: true
-    });
-    
-    appDetails.show();
-  });
-  
-  appMenu.on('accelTap', function(e) {
-    appMenu.hide();
-    getPosts();
-  });
-});
-
-main.on('accelTap', function(e){
-  console.log('Shake detected.');
-  getPosts();
-});
-
-function parseApps(data) {
-  var items = [];
-  
-  for (var i = 0; i < data.data.children.length; i++) {
-    if (data.data.children[i].data.is_self) continue;
-    
-    var postTitle = data.data.children[i].data.title;
-    postTitle = postTitle.replace("&amp;", "&");
-    postTitle = postTitle.replace("&lt;", "<");
-    postTitle = postTitle.replace("&gt;", ">");
-    
-    var titleArray = splitTitle(postTitle);
-    
-    var platform = titleArray[0];
-    var appName = titleArray[1];
-    var priceChange = titleArray[2];
-    var description = titleArray[3];
-    
-    if (description === undefined)
-      description = "";
-    else   
-      description = description + '\n\n';
-      
-    var user = data.data.children[i].data.author;
-    
-    items.push({
-      title: appName,
-      subtitle: platform,
-      body: '/u/' + user + '\n' + priceChange + '\n\n' + description
-    });
+var success = function ( data ) {
+  if ( ! data ) return main.body( 'no data' );
+  if ( ! data.result ) return main.body( 'no data.result, got ' + data );
+  if ( ! data.result.data ) return main.body( 'no data.result.data' );
+  Vibe.vibrate('short');
+  main.body( data.result.data.message || 'hmm no message');
+};
+var failure = function ( error ) {
+  Vibe.vibrate('long');
+  var msg = [ 'hmm data error' ];
+  for ( var key in error ) {
+    msg.push( key + ' ' + error[ key ] );
   }
-  
-  return items;
-}
+  main.body( msg.join( "\n" ));
+};
+var click = function ( e ) {
+  main.subtitle( 'Button ' + e.button + ' pressed.' );
+};
+var getData = function ( ) {
+  main.body( 'Loading...' );
+  var options = {
+    url: 'http://ourduino.no-ip.org/room/utility/laundrino?key=' + apiKey,
+    type: 'json'
+  };
+  ajax( options, success, failure );
+};
+var shake = function ( e ) {
+  console.log( 'Shake detected.' );
+  getData( );
+};
 
-// Credit to Thanasis Grammatopoulos from Stack Overflow for this function
-// http://stackoverflow.com/a/26446394/2005759
-function splitTitle(title) {
-  var titleRegex = new RegExp('(\\]\\s*\\[|\\s+\\[|\\]\\s+|\\[|\\])','g'); // Create reg exp (will be used 2 times)
-  var titleArray = title.split(titleRegex); // Split array on every match
-  
-  for (var i = titleArray.length-1; i >= 0; i--) { // Remove useless array items
-    // We are making a count down for because we remove items from the array
-    if (titleArray[i].length === 0 || titleArray[i].match(titleRegex))
-      titleArray.splice(i, 1);
+main.on( 'accelTap', shake );
+main.on( 'click', click );
+var closeConfig = function ( e ) {
+  console.log('closed configurable');
+  main.body( 'closed, ' + JSON.stringify( e.options ));
+  // Show the raw response if parsing failed
+  if (e.failed) {
+    console.log(e.response);
   }
-  
-  return titleArray;
-}
+};
+ 
+Settings.config( { url: 'http://www.clarkeology.com/project/pebble?apiKey=' + apiKey }, closeConfig );
+main.show( );
+getData( );
