@@ -1,0 +1,29 @@
+{
+  "name": "pebble-face",
+  "version": "1.0.0",
+  "description": "pebble watch app",
+  "main": "src/app.js",
+  "scripts": {
+    "lint": "make-up src test",
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pauly/pebble-face.git"
+  },
+  "keywords": [
+    "pebble",
+    "iot"
+  ],
+  "author": "Paul Clarke",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pauly/pebble-face/issues"
+  },
+  "homepage": "https://github.com/pauly/pebble-face#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "make-up": "^9.2.0",
+    "mocha": "^2.5.3"
+  }
+}
